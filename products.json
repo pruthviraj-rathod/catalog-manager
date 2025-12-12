@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1",
+    "name": "Sample Phone",
+    "category": "electronics",
+    "description": "A sample phone",
+    "expiryDate": null,
+    "costPrice": 10000,
+    "sellPrice": 12000,
+    "discount": 5,
+    "createdAt": "2025-12-12T08:57:39.736Z"
+  },
+  {
+    "id": "2",
+    "name": "Notebook",
+    "category": "books",
+    "description": "A ruled notebook",
+    "expiryDate": null,
+    "costPrice": 50,
+    "sellPrice": 80,
+    "discount": 0,
+    "createdAt": "2025-12-12T08:57:39.736Z"
+  },
+  {
+    "id": "36d10fab-36a8-4401-a0c1-e1d141746ed0",
+    "name": "Water Bottle",
+    "category": "grocery",
+    "description": "",
+    "expiryDate": "2026-11-30",
+    "costPrice": 8,
+    "sellPrice": 20,
+    "discount": 0,
+    "createdAt": "2025-12-12T08:58:22.068Z"
+  },
+  {
+    "id": "e7c8198f-37d1-4123-9f16-2738ad4081c5",
+    "name": "Shirt",
+    "category": "fashion",
+    "description": "Men's shirt - U.S Polo (All sizes available)",
+    "expiryDate": null,
+    "costPrice": 340,
+    "sellPrice": 1300,
+    "discount": 10,
+    "createdAt": "2025-12-12T08:59:32.515Z",
+    "updatedAt": "2025-12-12T09:00:08.010Z"
+  }
+]
