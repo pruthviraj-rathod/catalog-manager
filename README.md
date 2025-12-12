@@ -2,7 +2,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+live url : https://catalog-manager-u46z.vercel.app/
+
 First, run the development server:
+
 
 ```bash
 npm run dev
