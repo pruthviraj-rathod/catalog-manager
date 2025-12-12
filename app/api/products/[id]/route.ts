@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { Product } from "../../../../types/product";
-
-let productsStore: Product[] = [];
+import {
+  getProductById,
+  updateProduct,
+  deleteProduct,
+} from "../../../../lib/store";
 
 export async function GET(
   _req: Request,
@@ -9,7 +12,7 @@ export async function GET(
 ) {
   const resolvedParams = params ? await params : undefined;
   const id = resolvedParams?.id;
-  const found = productsStore.find((p) => p.id === id);
+  const found = await getProductById(id || "");
   if (!found)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   return NextResponse.json(found);
@@ -22,15 +25,9 @@ export async function PUT(
   const resolvedParams = params ? await params : undefined;
   const id = resolvedParams?.id;
   const body = await request.json();
-  const idx = productsStore.findIndex((p) => p.id === id);
-  if (idx === -1)
+  const updated = await updateProduct(id || "", body);
+  if (!updated)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
-  const updated = {
-    ...productsStore[idx],
-    ...body,
-    updatedAt: new Date().toISOString(),
-  };
-  productsStore[idx] = updated;
   return NextResponse.json(updated);
 }
 
@@ -40,9 +37,8 @@ export async function DELETE(
 ) {
   const resolvedParams = params ? await params : undefined;
   const id = resolvedParams?.id;
-  const idx = productsStore.findIndex((p) => p.id === id);
-  if (idx === -1)
+  const deleted = await deleteProduct(id || "");
+  if (!deleted)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
-  productsStore.splice(idx, 1);
   return NextResponse.json({ message: "deleted" });
 }
