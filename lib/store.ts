@@ -33,15 +33,24 @@ async function readProducts(): Promise<Product[]> {
   try {
     const data = await fs.readFile(PRODUCTS_FILE, "utf-8");
     return JSON.parse(data);
-  } catch {
+  } catch (error) {
     // File doesn't exist or is invalid, initialize with default products
-    await writeProducts(INITIAL_PRODUCTS);
+    try {
+      await writeProducts(INITIAL_PRODUCTS);
+    } catch (writeError) {
+      console.error("Failed to write products file:", writeError);
+    }
     return INITIAL_PRODUCTS;
   }
 }
 
 async function writeProducts(products: Product[]): Promise<void> {
-  await fs.writeFile(PRODUCTS_FILE, JSON.stringify(products, null, 2));
+  try {
+    await fs.writeFile(PRODUCTS_FILE, JSON.stringify(products, null, 2));
+  } catch (error) {
+    console.error("Failed to write products:", error);
+    throw error;
+  }
 }
 
 export async function getAllProducts(): Promise<Product[]> {

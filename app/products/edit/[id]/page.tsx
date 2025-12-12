@@ -1,12 +1,13 @@
 import React from "react";
 import ProductForm from "../../../components/ProductForm";
+import { getProductById } from "../../../../lib/store";
 
 export default async function Page({
   params,
 }: { params?: { id?: string } | Promise<{ id?: string }> } = {}) {
   const resolvedParams = params ? await params : undefined;
   const id = resolvedParams?.id;
-  console.log("id---", id);
+
   if (id === "new") {
     return (
       <div className="p-6">
@@ -25,13 +26,11 @@ export default async function Page({
     );
   }
 
-  const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  console.log("basebasebase-", base);
-  const res = await fetch(`${base}/api/products/${id}`);
-  console.log("resresres-", res);
   let product = null;
-  if (res.ok) {
-    product = await res.json();
+  try {
+    product = await getProductById(id);
+  } catch (error) {
+    console.error("Failed to fetch product:", error);
   }
 
   return (
