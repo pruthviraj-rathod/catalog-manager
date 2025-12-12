@@ -111,7 +111,7 @@ export default function ProductForm({ initial, onSuccess }: Props) {
             required
             type="number"
             step="0.01"
-            value={costPrice}
+            value={costPrice ?? ""}
             onChange={(e) => setCostPrice(Number(e.target.value))}
             className="mt-1 block w-full rounded border px-3 py-2"
           />
@@ -122,7 +122,7 @@ export default function ProductForm({ initial, onSuccess }: Props) {
             required
             type="number"
             step="0.01"
-            value={sellPrice}
+            value={sellPrice ?? ""}
             onChange={(e) => setSellPrice(Number(e.target.value))}
             className="mt-1 block w-full rounded border px-3 py-2"
           />
@@ -132,7 +132,7 @@ export default function ProductForm({ initial, onSuccess }: Props) {
           <input
             type="number"
             step="0.01"
-            value={discount}
+            value={discount ?? ""}
             onChange={(e) => setDiscount(Number(e.target.value))}
             className="mt-1 block w-full rounded border px-3 py-2"
           />
