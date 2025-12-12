@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import ProductCard from "./ProductCard";
 import { Product } from "../../types/product";
 import SearchBar from "./SearchBar";
+import { Loader } from "./Loader";
 
 export default function ProductsList() {
   const params = useSearchParams();
@@ -21,7 +22,15 @@ export default function ProductsList() {
     fetch(`/api/products${q ? `?q=${encodeURIComponent(q)}` : ""}`)
       .then((r) => r.json())
       .then((data: Product[]) => {
-        if (mounted) setProducts(data);
+        if (mounted) {
+          setProducts(data);
+          // Save to localStorage for persistence
+          try {
+            localStorage.setItem("products", JSON.stringify(data));
+          } catch (error) {
+            console.error("Failed to save to localStorage:", error);
+          }
+        }
       })
       .catch((err) => console.error(err))
       .finally(() => mounted && setLoading(false));
@@ -98,7 +107,10 @@ export default function ProductsList() {
 
   const totalCostPrice = products.reduce((sum, p) => sum + p.costPrice, 0);
   const totalSellPrice = products.reduce((sum, p) => sum + p.sellPrice, 0);
-  const totalFinalPrice = totalSellPrice - totalCostPrice;
+  const totalFinalPrice = products.reduce(
+    (sum, p) => sum + (p.sellPrice - (p.sellPrice * p.discount) / 100),
+    0
+  );
 
   return (
     <div>
@@ -120,7 +132,7 @@ export default function ProductsList() {
       </div>
 
       {loading ? (
-        <div>Loading...</div>
+        <Loader />
       ) : products.length === 0 ? (
         <div>No products found</div>
       ) : (
@@ -142,44 +154,49 @@ export default function ProductsList() {
                   <th className="px-4 py-3 text-right">Cost Price</th>
                   <th className="px-4 py-3 text-right">Sell Price</th>
                   <th className="px-4 py-3 text-right">Discount %</th>
+                  <th className="px-4 py-3 text-right">Final Price</th>
                   <th className="px-4 py-3 text-left">Expiry Date</th>
                   <th className="px-4 py-3 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {paginated.map((p) => (
-                  <tr key={p.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selected.includes(p.id)}
-                        onChange={(e) => toggleSelect(p.id)}
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-medium">{p.name}</td>
-                    <td className="px-4 py-3">{p.category}</td>
-                    <td className="px-4 py-3 text-sm">{p.description || "-"}</td>
-                    <td className="px-4 py-3 text-right">₹{p.costPrice}</td>
-                    <td className="px-4 py-3 text-right">₹{p.sellPrice}</td>
-                    <td className="px-4 py-3 text-right">{p.discount}%</td>
-                    <td className="px-4 py-3 text-sm">{p.expiryDate || "-"}</td>
-                    <td className="px-4 py-3">
-                      <a
-                        href={`/products/edit/${p.id}`}
-                        className="text-blue-600 hover:underline text-sm mr-3"
-                      >
-                        Edit
-                      </a>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        disabled={deletingIds.includes(p.id)}
-                        className="text-red-600 hover:underline text-sm disabled:opacity-50"
-                      >
-                        {deletingIds.includes(p.id) ? "Deleting..." : "Delete"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {paginated.map((p) => {
+                  const finalPrice = p.sellPrice - (p.sellPrice * p.discount) / 100;
+                  return (
+                    <tr key={p.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(p.id)}
+                          onChange={(e) => toggleSelect(p.id)}
+                        />
+                      </td>
+                      <td className="px-4 py-3 font-medium">{p.name}</td>
+                      <td className="px-4 py-3">{p.category}</td>
+                      <td className="px-4 py-3 text-sm">{p.description || "-"}</td>
+                      <td className="px-4 py-3 text-right">₹{p.costPrice}</td>
+                      <td className="px-4 py-3 text-right">₹{p.sellPrice}</td>
+                      <td className="px-4 py-3 text-right">{p.discount}%</td>
+                      <td className="px-4 py-3 text-right font-semibold text-green-600">₹{finalPrice.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm">{p.expiryDate || "-"}</td>
+                      <td className="px-4 py-3">
+                        <a
+                          href={`/products/edit/${p.id}`}
+                          className="text-blue-600 hover:underline text-sm mr-3"
+                        >
+                          Edit
+                        </a>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          disabled={deletingIds.includes(p.id)}
+                          className="text-red-600 hover:underline text-sm disabled:opacity-50"
+                        >
+                          {deletingIds.includes(p.id) ? "Deleting..." : "Delete"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
               <tfoot>
                 <tr className="bg-gray-200 font-bold">
@@ -188,7 +205,8 @@ export default function ProductsList() {
                   </td>
                   <td className="px-4 py-3 text-right">₹{totalCostPrice}</td>
                   <td className="px-4 py-3 text-right">₹{totalSellPrice}</td>
-                  <td className="px-4 py-3 text-right">₹{totalFinalPrice}</td>
+                  <td className="px-4 py-3 text-right">-</td>
+                  <td className="px-4 py-3 text-right text-green-700">₹{totalFinalPrice.toFixed(2)}</td>
                   <td colSpan={2}></td>
                 </tr>
               </tfoot>

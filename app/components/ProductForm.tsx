@@ -34,18 +34,38 @@ export default function ProductForm({ initial, onSuccess }: Props) {
     };
 
     try {
-      if (id) {
-        await fetch(`/api/products/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        await fetch(`/api/products`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+      const response = id
+        ? await fetch(`/api/products/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+        : await fetch(`/api/products`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Update localStorage
+        try {
+          const stored = localStorage.getItem("products");
+          const products = stored ? JSON.parse(stored) : [];
+          if (id) {
+            // Update existing
+            const idx = products.findIndex((p: any) => p.id === id);
+            if (idx !== -1) {
+              products[idx] = result;
+            }
+          } else {
+            // Add new
+            products.push(result);
+          }
+          localStorage.setItem("products", JSON.stringify(products));
+        } catch (error) {
+          console.error("Failed to update localStorage:", error);
+        }
       }
       onSuccess?.();
       router.replace("/products");
