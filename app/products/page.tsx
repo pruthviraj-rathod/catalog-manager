@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React from "react";
+import React, { Suspense } from "react";
 import ProductsList from "../components/ProductsList";
 
 export default function Page() {
@@ -14,7 +14,9 @@ export default function Page() {
           New Product
         </Link>
       </div>
-      <ProductsList />
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProductsList />
+      </Suspense>
     </div>
   );
 }
