@@ -96,6 +96,10 @@ export default function ProductsList() {
     }
   }
 
+  const totalCostPrice = products.reduce((sum, p) => sum + p.costPrice, 0);
+  const totalSellPrice = products.reduce((sum, p) => sum + p.sellPrice, 0);
+  const totalFinalPrice = totalSellPrice - totalCostPrice;
+
   return (
     <div>
       <div className="mb-4">
@@ -121,40 +125,80 @@ export default function ProductsList() {
         <div>No products found</div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {paginated.map((p) => (
-              <div key={p.id} className="flex gap-3 items-start">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(p.id)}
-                  onChange={(e) => toggleSelect(p.id)}
-                  className="mt-2"
-                />
-                <div className="flex-1">
-                  <ProductCard product={p} />
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      disabled={deletingIds.includes(p.id)}
-                      className="text-sm text-red-600"
-                    >
-                      {deletingIds.includes(p.id) ? "Deleting..." : "Delete"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-blue-600 text-white">
+                  <th className="px-4 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      onChange={(e) => selectAllOnPage(e.target.checked)}
+                      checked={paginated.length > 0 && paginated.every((p) => selected.includes(p.id))}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Category</th>
+                  <th className="px-4 py-3 text-left">Description</th>
+                  <th className="px-4 py-3 text-right">Cost Price</th>
+                  <th className="px-4 py-3 text-right">Sell Price</th>
+                  <th className="px-4 py-3 text-right">Discount %</th>
+                  <th className="px-4 py-3 text-left">Expiry Date</th>
+                  <th className="px-4 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((p) => (
+                  <tr key={p.id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(p.id)}
+                        onChange={(e) => toggleSelect(p.id)}
+                      />
+                    </td>
+                    <td className="px-4 py-3 font-medium">{p.name}</td>
+                    <td className="px-4 py-3">{p.category}</td>
+                    <td className="px-4 py-3 text-sm">{p.description || "-"}</td>
+                    <td className="px-4 py-3 text-right">₹{p.costPrice}</td>
+                    <td className="px-4 py-3 text-right">₹{p.sellPrice}</td>
+                    <td className="px-4 py-3 text-right">{p.discount}%</td>
+                    <td className="px-4 py-3 text-sm">{p.expiryDate || "-"}</td>
+                    <td className="px-4 py-3">
+                      <a
+                        href={`/products/edit/${p.id}`}
+                        className="text-blue-600 hover:underline text-sm mr-3"
+                      >
+                        Edit
+                      </a>
+                      <button
+                        onClick={() => handleDelete(p.id)}
+                        disabled={deletingIds.includes(p.id)}
+                        className="text-red-600 hover:underline text-sm disabled:opacity-50"
+                      >
+                        {deletingIds.includes(p.id) ? "Deleting..." : "Delete"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-gray-200 font-bold">
+                  <td colSpan={4} className="px-4 py-3 text-right">
+                    TOTAL:
+                  </td>
+                  <td className="px-4 py-3 text-right">₹{totalCostPrice}</td>
+                  <td className="px-4 py-3 text-right">₹{totalSellPrice}</td>
+                  <td className="px-4 py-3 text-right">₹{totalFinalPrice}</td>
+                  <td colSpan={2}></td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
 
           <div className="mt-4 flex items-center justify-between">
             <div>
               <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  onChange={(e) => selectAllOnPage(e.target.checked)}
-                  checked={paginated.every((p) => selected.includes(p.id))}
-                />
-                <span className="text-sm">Select all on page</span>
+                <span className="text-sm">Page</span>
               </label>
             </div>
             <div className="flex items-center gap-2">
@@ -166,7 +210,7 @@ export default function ProductsList() {
                 Prev
               </button>
               <div className="text-sm">
-                Page {page} / {totalPages}
+                {page} / {totalPages}
               </div>
               <button
                 onClick={() => setPage((s) => Math.min(totalPages, s + 1))}
